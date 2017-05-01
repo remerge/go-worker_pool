@@ -1,0 +1,3 @@
+package: github.com/remerge/go-worker_pool
+import:
+- package: github.com/bobziuchkovski/cue
