@@ -7,7 +7,9 @@ import (
 )
 
 type Pool interface {
+	Send(id int, msg interface{})
 	Run()
+	Close()
 }
 
 type pool struct {
@@ -23,6 +25,10 @@ func NewPool(numWorkers int, callback WorkerCallback) Pool {
 		workers:  make([]*Worker, numWorkers),
 		log:      cue.NewLogger("workerpool"),
 	}
+}
+
+func (p *pool) Send(id int, msg interface{}) {
+	p.workers[id%cap(p.workers)].channel <- msg
 }
 
 func (p *pool) Run() {
