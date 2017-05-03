@@ -1,23 +1,35 @@
 package workerpool
 
+import (
+	"fmt"
+
+	"github.com/bobziuchkovski/cue"
+)
+
 type WorkerCallback func(*Worker)
 
 type Worker struct {
-	channel  chan interface{}
-	closer   chan bool
-	done     chan bool
-	callback WorkerCallback
+	Log         cue.Logger
+	channel     chan interface{}
+	notifyClose chan bool
+	closed      bool
+	notifyDone  chan bool
+	done        bool
+	callback    WorkerCallback
 }
 
-func NewWorker(callback WorkerCallback) *Worker {
-	return &Worker{
-		channel:  make(chan interface{}),
-		closer:   make(chan bool),
-		callback: callback,
-	}
+func NewWorker(callback WorkerCallback) (w *Worker) {
+	w = &Worker{}
+	w.Log = cue.NewLogger(fmt.Sprintf("worker-%p", w))
+	w.channel = make(chan interface{})
+	w.notifyClose = make(chan bool)
+	w.notifyDone = make(chan bool)
+	w.callback = callback
+	return w
 }
 
 func (w *Worker) Run() {
+	w.Log.Debug("run loop start callback")
 	w.callback(w)
 }
 
@@ -26,14 +38,36 @@ func (w *Worker) Channel() chan interface{} {
 }
 
 func (w *Worker) Closer() chan bool {
-	return w.closer
+	return w.notifyClose
 }
 
-func (w *Worker) WaitClose() {
-	close(w.closer)
-	<-w.done
+func (w *Worker) Close() {
+	if !w.closed {
+		w.Log.Debug("run loop notify close")
+		close(w.notifyClose)
+		w.closed = true
+	}
+}
+
+func (w *Worker) Wait() {
+	w.Log.Debug("run loop wait")
+	<-w.notifyDone
+	w.Log.Debug("run loop done")
+}
+
+func (w *Worker) CloseWait() {
+	w.Close()
+	w.Wait()
 }
 
 func (w *Worker) Done() {
-	close(w.done)
+	// worker loop might have called Done() without Close() being called
+	// before, so let's close the channel for good measure
+	w.Close()
+
+	if !w.done {
+		w.Log.Debug("run loop notify done")
+		close(w.notifyDone)
+		w.done = false
+	}
 }
