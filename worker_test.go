@@ -19,7 +19,7 @@ var workerFunc = func(w *Worker) {
 }
 
 func TestWorker(t *testing.T) {
-	worker := NewWorker(workerFunc)
+	worker := NewWorker("test_worker", workerFunc)
 
 	go worker.Run()
 

@@ -1,10 +1,6 @@
 package workerpool
 
-import (
-	"fmt"
-
-	"github.com/bobziuchkovski/cue"
-)
+import "github.com/bobziuchkovski/cue"
 
 type WorkerCallback func(*Worker)
 
@@ -18,9 +14,9 @@ type Worker struct {
 	callback    WorkerCallback
 }
 
-func NewWorker(callback WorkerCallback) (w *Worker) {
+func NewWorker(name string, callback WorkerCallback) (w *Worker) {
 	w = &Worker{}
-	w.Log = cue.NewLogger(fmt.Sprintf("worker-%p", w))
+	w.Log = cue.NewLogger(name)
 	w.channel = make(chan interface{})
 	w.notifyClose = make(chan bool)
 	w.notifyDone = make(chan bool)

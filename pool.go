@@ -8,42 +8,30 @@ import (
 	"github.com/bobziuchkovski/cue"
 )
 
-type Pool interface {
-	Run()
-	Close()
-	Send(id int, msg interface{})
-	Recv() interface{}
-}
-
-type pool struct {
+type Pool struct {
+	name     string
 	callback WorkerCallback
 	workers  []*Worker
 	wg       sync.WaitGroup
 	log      cue.Logger
 }
 
-func NewPool(numWorkers int, callback WorkerCallback) Pool {
-	p := &pool{}
+func NewPool(name string, numWorkers int, callback WorkerCallback) *Pool {
+	p := &Pool{}
+	p.name = name
 	p.callback = callback
 	p.workers = make([]*Worker, numWorkers)
-	p.log = cue.NewLogger(fmt.Sprintf("workerpool-%p", p))
+	p.log = cue.NewLogger(p.name)
 	return p
 }
 
-func (p *pool) Send(id int, msg interface{}) {
-	p.log.WithFields(cue.Fields{
-		"id":  id,
-		"msg": msg,
-	}).Debug("send")
-	p.workers[id%cap(p.workers)].channel <- msg
-	p.log.WithFields(cue.Fields{
-		"id":  id,
-		"msg": msg,
-	}).Debug("sent")
+func (p *Pool) Send(id int, msg interface{}) {
+	p.workers[id%cap(p.workers)].Channel() <- msg
 }
 
-func (p *pool) Recv() interface{} {
+func (p *Pool) Recv() interface{} {
 	cases := make([]reflect.SelectCase, cap(p.workers))
+
 	for i, worker := range p.workers {
 		cases[i] = reflect.SelectCase{
 			Dir:  reflect.SelectRecv,
@@ -51,33 +39,31 @@ func (p *pool) Recv() interface{} {
 		}
 	}
 
-	chosen, value, ok := reflect.Select(cases)
-	p.log.WithFields(cue.Fields{
-		"chosen": chosen,
-		"value":  value,
-		"ok":     ok,
-	}).Debug("select")
+	_, value, ok := reflect.Select(cases)
+
+	if !ok {
+		return nil
+	}
 
 	return value.Interface()
 }
 
-func (p *pool) Run() {
+func (p *Pool) Run() {
 	p.log.WithFields(cue.Fields{
 		"numWorkers": cap(p.workers),
 	}).Info("worker pool spawn")
 
 	for i := 0; i < cap(p.workers); i++ {
-		p.workers[i] = NewWorker(p.callback)
+		p.workers[i] = NewWorker(fmt.Sprintf("%v/%v", p.name, i), p.callback)
 		go func(num int) {
 			p.wg.Add(1)
 			defer p.wg.Done()
-			p.log.Debugf("run worker %v", num)
 			p.workers[num].Run()
 		}(i)
 	}
 }
 
-func (p *pool) Close() {
+func (p *Pool) Close() {
 	p.log.Info("worker pool shutdown")
 	for _, w := range p.workers {
 		w.CloseWait()

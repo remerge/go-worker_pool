@@ -7,7 +7,7 @@ import (
 func TestPool(t *testing.T) {
 	numWorkers := 4
 
-	pool := NewPool(numWorkers, workerFunc)
+	pool := NewPool("test_pool", numWorkers, workerFunc)
 
 	pool.Run()
 
