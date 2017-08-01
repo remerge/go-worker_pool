@@ -17,15 +17,19 @@ type Pool struct {
 }
 
 func NewPool(name string, numWorkers int, callback WorkerCallback) *Pool {
-	p := &Pool{}
-	p.name = name
-	p.callback = callback
-	p.workers = make([]*Worker, numWorkers)
-	p.log = cue.NewLogger(p.name)
-	return p
+	return &Pool{
+		name:     name,
+		callback: callback,
+		workers:  make([]*Worker, numWorkers),
+		log:      cue.NewLogger(name),
+	}
 }
 
+// Send a message to one of the workers, determined by the provided id
 func (p *Pool) Send(id int, msg interface{}) {
+	if id < 0 {
+		id = -id
+	}
 	p.workers[id%cap(p.workers)].Channel() <- msg
 }
 
