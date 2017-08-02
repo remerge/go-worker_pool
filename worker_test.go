@@ -24,9 +24,37 @@ func TestWorker(t *testing.T) {
 	go worker.Run()
 
 	msg := <-worker.Channel()
-	if msg.(bool) != true {
+	if !msg.(bool) {
 		t.Error("Expected true, got ", msg)
 	}
 
 	worker.CloseWait()
+}
+
+var readerFunc = func(w *Worker) {
+	for {
+		select {
+		case <-w.Closer():
+			w.Done()
+			return
+		case msg, ok := <-w.Channel():
+			if !ok {
+				panic("channel closed unexpectedly")
+			}
+			if msg != "testmessage" {
+				panic("message was different from testmessage")
+			}
+			testLog.Debug(msg.(string))
+		}
+	}
+}
+
+func TestWorker_Send(t *testing.T) {
+	reader := NewWorker("test_reader", readerFunc)
+
+	go reader.Run()
+
+	reader.Channel() <- "testmessage"
+
+	reader.Close()
 }
