@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/bobziuchkovski/cue"
+	"github.com/remerge/cue"
 )
 
 type Pool struct {

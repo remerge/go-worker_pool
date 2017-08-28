@@ -1,6 +1,6 @@
 package workerpool
 
-import "github.com/bobziuchkovski/cue"
+import "github.com/remerge/cue"
 
 type WorkerCallback func(*Worker)
 
