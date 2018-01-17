@@ -67,6 +67,10 @@ func (p *Pool) Run() {
 	}
 }
 
+func (p *Pool) Wait() {
+	p.wg.Wait()
+}
+
 func (p *Pool) Close() {
 	p.log.Info("worker pool shutdown")
 	for _, w := range p.workers {
