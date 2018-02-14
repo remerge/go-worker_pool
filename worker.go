@@ -8,8 +8,8 @@ type Worker struct {
 	Log         cue.Logger
 	channel     chan interface{}
 	notifyClose chan bool
-	closed      bool
 	notifyDone  chan bool
+	closed      bool
 	done        bool
 	callback    WorkerCallback
 }

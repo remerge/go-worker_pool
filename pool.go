@@ -59,8 +59,8 @@ func (p *Pool) Run() {
 
 	for i := 0; i < cap(p.workers); i++ {
 		p.workers[i] = NewWorker(fmt.Sprintf("%v/%v", p.name, i), p.callback)
+		p.wg.Add(1)
 		go func(num int) {
-			p.wg.Add(1)
 			defer p.wg.Done()
 			p.workers[num].Run()
 		}(i)

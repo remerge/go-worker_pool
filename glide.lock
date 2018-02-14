@@ -1,8 +1,8 @@
 hash: 4f644d1e274076cf8fa027264a2b7e586a93b55c58edb93ecc7574ef4b3d586b
-updated: 2017-12-05T12:46:09.912390268+01:00
+updated: 2018-02-13T16:13:14.370639312Z
 imports:
 - name: github.com/remerge/cue
-  version: 2bf0689b2311d580f8c7182df1161899bbfc853f
+  version: 28dfe61cfc192ac3fce01cdead089ff01549cdfd
   subpackages:
   - collector
   - format
