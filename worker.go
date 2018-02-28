@@ -1,10 +1,15 @@
 package workerpool
 
-import "github.com/remerge/cue"
+import (
+	"sync"
+
+	"github.com/remerge/cue"
+)
 
 type WorkerCallback func(*Worker)
 
 type Worker struct {
+	sync.Mutex
 	Log         cue.Logger
 	channel     chan interface{}
 	notifyClose chan bool
@@ -38,6 +43,8 @@ func (w *Worker) Closer() chan bool {
 }
 
 func (w *Worker) Close() {
+	w.Lock()
+	defer w.Unlock()
 	if !w.closed {
 		w.Log.Debug("run loop notify close")
 		close(w.notifyClose)
@@ -60,6 +67,9 @@ func (w *Worker) Done() {
 	// worker loop might have called Done() without Close() being called
 	// before, so let's close the channel for good measure
 	w.Close()
+
+	w.Lock()
+	defer w.Unlock()
 
 	if !w.done {
 		w.Log.Debug("run loop notify done")
