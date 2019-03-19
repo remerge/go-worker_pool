@@ -23,7 +23,7 @@ func TestPool(t *testing.T) {
 	pool.Close()
 }
 
-func TestPool_Send(t *testing.T) {
+func TestPool_Send(_ *testing.T) {
 	numWorkers := 4
 
 	pool := NewPool("test_pool", numWorkers, readerFunc)
