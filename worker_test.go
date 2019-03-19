@@ -49,7 +49,7 @@ var readerFunc = func(w *Worker) {
 	}
 }
 
-func TestWorker_Send(t *testing.T) {
+func TestWorker_Send(_ *testing.T) {
 	reader := NewWorker("test_reader", readerFunc)
 
 	go reader.Run()
