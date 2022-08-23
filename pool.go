@@ -31,6 +31,10 @@ func (p *Pool) Send(msg interface{}) {
 	p.channel <- msg
 }
 
+func (p *Pool) Channel() chan interface{} {
+	return p.channel
+}
+
 func (p *Pool) Run() {
 	p.log.WithFields(cue.Fields{
 		"numWorkers": cap(p.workers),
