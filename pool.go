@@ -2,7 +2,6 @@ package workerpool
 
 import (
 	"fmt"
-	"reflect"
 	"sync"
 
 	"github.com/remerge/cue"
@@ -14,42 +13,22 @@ type Pool struct {
 	workers  []*Worker
 	wg       sync.WaitGroup
 	log      cue.Logger
+	channel  chan interface{}
 }
 
 func NewPool(name string, numWorkers int, callback WorkerCallback) *Pool {
 	return &Pool{
 		name:     name,
 		callback: callback,
+		channel:  make(chan interface{}, numWorkers*2),
 		workers:  make([]*Worker, numWorkers),
 		log:      cue.NewLogger(name),
 	}
 }
 
 // Send a message to one of the workers, determined by the provided id
-func (p *Pool) Send(id int, msg interface{}) {
-	if id < 0 {
-		id = -id
-	}
-	p.workers[id%cap(p.workers)].Channel() <- msg
-}
-
-func (p *Pool) Recv() interface{} {
-	cases := make([]reflect.SelectCase, cap(p.workers))
-
-	for i, worker := range p.workers {
-		cases[i] = reflect.SelectCase{
-			Dir:  reflect.SelectRecv,
-			Chan: reflect.ValueOf(worker.Channel()),
-		}
-	}
-
-	_, value, ok := reflect.Select(cases)
-
-	if !ok {
-		return nil
-	}
-
-	return value.Interface()
+func (p *Pool) Send(msg interface{}) {
+	p.channel <- msg
 }
 
 func (p *Pool) Run() {

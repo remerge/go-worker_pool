@@ -11,7 +11,6 @@ type WorkerCallback func(*Worker)
 type Worker struct {
 	sync.Mutex
 	Log         cue.Logger
-	channel     chan interface{}
 	notifyClose chan bool
 	notifyDone  chan bool
 	closed      bool
@@ -22,7 +21,6 @@ type Worker struct {
 func NewWorker(name string, callback WorkerCallback) (w *Worker) {
 	w = &Worker{}
 	w.Log = cue.NewLogger(name)
-	w.channel = make(chan interface{})
 	w.notifyClose = make(chan bool)
 	w.notifyDone = make(chan bool)
 	w.callback = callback
@@ -32,10 +30,6 @@ func NewWorker(name string, callback WorkerCallback) (w *Worker) {
 func (w *Worker) Run() {
 	w.Log.Debug("run loop start callback")
 	w.callback(w)
-}
-
-func (w *Worker) Channel() chan interface{} {
-	return w.channel
 }
 
 func (w *Worker) Closer() chan bool {
