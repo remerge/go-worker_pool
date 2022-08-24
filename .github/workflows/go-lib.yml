@@ -12,4 +12,3 @@ jobs:
     uses: remerge/workflows/.github/workflows/go-checks.yml@allow_use_no_ssh_key
     with:
       goprivate: ""
-      use-ssh-key: false
