@@ -26,6 +26,7 @@ func NewPool(name string, numWorkers int, callback WorkerCallback) *Pool {
 }
 
 // Send a message to one of the workers, determined by the provided id
+// We need this if we use aerospike to avoid concurrent writes for the same user
 func (p *Pool) Send(id int, msg interface{}) {
 	if id < 0 {
 		id = -id
