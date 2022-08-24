@@ -14,4 +14,3 @@ jobs:
       directory: mkf
       repo: github.com/remerge/go-makefile
       branch: master
-
