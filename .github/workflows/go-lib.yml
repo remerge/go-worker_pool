@@ -1,11 +1,11 @@
 name: Go App
 on:
-#   pull_request:
+  pull_request:
   push:
-#     branches:
-#     - master
-#     - main
-#     - production
+    branches:
+    - master
+    - main
+    - production
 
 jobs:
   go-checks:
