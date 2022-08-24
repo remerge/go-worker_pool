@@ -5,11 +5,11 @@ on:
 
 jobs:
   go-modules:
-    uses: remerge/workflows/.github/workflows/go-modules.yml@master
+    uses: remerge/workflows/.github/workflows/go-modules.yml@main
     with:
       goprivate: ""
   upstream:
-    uses: remerge/workflows/.github/workflows/upstream-check.yml@master
+    uses: remerge/workflows/.github/workflows/upstream-check.yml@main
     with:
       directory: mkf
       repo: github.com/remerge/go-makefile
