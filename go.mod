@@ -1,5 +1,5 @@
 module github.com/remerge/go-worker_pool
 
-go 1.18
+go 1.21
 
-require github.com/remerge/cue v0.0.0-20180404154012-5ce627d813ef
+require github.com/remerge/cue v0.0.0-20230118100141-67b45f1f06a5
